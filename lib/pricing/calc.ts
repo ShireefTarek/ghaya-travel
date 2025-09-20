@@ -9,6 +9,12 @@ export type PricingInput = {
   flightSelection?: {
     price: number;
     currency: string;
+    offerId?: string;
+    provider?: string;
+    seatIds?: string[];
+    seatTotal?: number;
+    ticketing?: unknown;
+    segments?: unknown;
   };
   seatSelections?: {
     seatId: string;
@@ -118,17 +124,17 @@ export async function calculatePrice(input: PricingInput): Promise<PricingBreakd
     (input.seatSelections || []).map(async (seat) => ({
       seatId: seat.seatId,
       label: seat.label,
-      total: await convertCurrency(seat.price, seat.currency, input.bookingCurrency)
+      total: await convertCurrency(seat.price ?? 0, seat.currency, input.bookingCurrency)
     }))
   );
+  const seatTotal = seatLines.reduce((acc, seat) => acc + seat.total, 0);
 
   const seasonalPercent = await applySeasonalMarkup(pkg.id, input.travelDate);
   const promo = await resolvePromo(input.promoCode);
 
-  const subtotal = [convertedBase, ...convertedAddOns.map((i) => i.total), seatLines.reduce((acc, seat) => acc + seat.total, 0), flightLine?.total || 0].reduce(
-    (acc, val) => acc + val,
-    0
-  );
+  const addOnTotal = convertedAddOns.reduce((acc, item) => acc + item.total, 0);
+  const flightTotal = flightLine?.total || 0;
+  const subtotal = convertedBase + addOnTotal + seatTotal + flightTotal;
 
   const markupAmount = seasonalPercent ? (subtotal * seasonalPercent) / 100 : 0;
   let promoAmount = 0;

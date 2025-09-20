@@ -7,6 +7,15 @@ import PriceBreakdown from '@/components/checkout/price-breakdown';
 import { PricingBreakdown } from '@/lib/pricing/calc';
 import { formatCurrency } from '@/lib/utils';
 
+type SeatSelectionDetail = {
+  seatId: string;
+  label: string;
+  price: number;
+  currency: string;
+  segmentId?: string;
+  type?: string;
+};
+
 interface PackageWithAddOns extends Package {
   addOns: AddOn[];
   destinations?: { city: string | null; country: string | null }[];
@@ -34,10 +43,16 @@ export default function BookingWizard({ locale, pkg }: Props) {
   const [selectedOffer, setSelectedOffer] = useState<any | null>(null);
   const [seatMaps, setSeatMaps] = useState<any[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [seatDetails, setSeatDetails] = useState<SeatSelectionDetail[]>([]);
   const [travelers, setTravelers] = useState([defaultTraveler]);
   const [breakdown, setBreakdown] = useState<PricingBreakdown | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [flightPricing, setFlightPricing] = useState<{
+    base: number;
+    seatTotal: number;
+    currency: string;
+  } | null>(null);
 
   const packageCurrency = pkg.currency;
 
@@ -71,18 +86,77 @@ export default function BookingWizard({ locale, pkg }: Props) {
     const data = await res.json();
     setSeatMaps(data.seatMaps || []);
     setSelectedSeats([]);
+    setSeatDetails([]);
+    setFlightPricing({
+      base: offer.totalAmount,
+      seatTotal: 0,
+      currency: offer.currency || packageCurrency
+    });
     setSelectedOffer(offer);
   }
 
   async function handleSeatChange(seats: string[]) {
     setSelectedSeats(seats);
-    if (!selectedOffer) return;
+    if (!selectedOffer) {
+      return;
+    }
+
+    if (seats.length === 0) {
+      setSeatDetails([]);
+      setFlightPricing({
+        base: selectedOffer.totalAmount,
+        seatTotal: 0,
+        currency: selectedOffer.currency || packageCurrency
+      });
+      return;
+    }
+
     const res = await fetch('/api/flights/price', {
       method: 'POST',
       body: JSON.stringify({ offerId: selectedOffer.id, seatIds: seats })
     });
     const data = await res.json();
-    setSelectedOffer({ ...selectedOffer, totalAmount: data.priced.totalAmount });
+    const priced = data.priced;
+    const fallbackCurrency = priced?.currency || selectedOffer.currency || packageCurrency;
+    const flattenedSeats = seatMaps.flatMap((map: any) =>
+      (map.seats || []).map((seat: any) => ({ ...seat, segmentId: map.segmentId }))
+    );
+
+    const pricedSeats: SeatSelectionDetail[] = (priced?.seatSelections || []).map((seat: any) => {
+      const meta = flattenedSeats.find((item: any) => item.id === seat.id);
+      return {
+        seatId: seat.id,
+        label: seat.label || meta?.label || seat.id,
+        price: seat.price ?? meta?.price ?? 0,
+        currency: seat.currency || meta?.currency || fallbackCurrency,
+        segmentId: meta?.segmentId,
+        type: meta?.type
+      };
+    });
+
+    const detailedSeats = pricedSeats.length
+      ? pricedSeats
+      : seats.map((seatId) => {
+          const meta = flattenedSeats.find((item: any) => item.id === seatId);
+          return {
+            seatId,
+            label: meta?.label || seatId,
+            price: meta?.price ?? 0,
+            currency: meta?.currency || fallbackCurrency,
+            segmentId: meta?.segmentId,
+            type: meta?.type
+          } as SeatSelectionDetail;
+        });
+
+    const seatTotal = detailedSeats.reduce((acc, seat) => acc + seat.price, 0);
+    const baseAmount = Math.max(0, (priced?.totalAmount ?? selectedOffer.totalAmount) - seatTotal);
+
+    setSeatDetails(detailedSeats);
+    setFlightPricing({
+      base: baseAmount,
+      seatTotal,
+      currency: fallbackCurrency
+    });
   }
 
   async function computeBreakdown() {
@@ -96,15 +170,15 @@ export default function BookingWizard({ locale, pkg }: Props) {
         promoCode: undefined,
         flightSelection: selectedOffer
           ? {
-              price: selectedOffer.totalAmount,
-              currency: selectedOffer.currency
+              price: flightPricing?.base ?? selectedOffer.totalAmount,
+              currency: flightPricing?.currency || selectedOffer.currency
             }
           : undefined,
-        seatSelections: selectedSeats.map((seatId) => ({
-          seatId,
-          label: seatId,
-          price: 25,
-          currency: selectedOffer?.currency || packageCurrency
+        seatSelections: seatDetails.map((seat) => ({
+          seatId: seat.seatId,
+          label: seat.label,
+          price: seat.price,
+          currency: seat.currency
         }))
       })
     });
@@ -116,7 +190,8 @@ export default function BookingWizard({ locale, pkg }: Props) {
     if (step === 4) {
       computeBreakdown();
     }
-  }, [step]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, selectedAddOns, travelers.length, seatDetails, selectedOffer, flightPricing]);
 
   function toggleAddOn(id: string) {
     setSelectedAddOns((prev) =>
@@ -152,7 +227,23 @@ export default function BookingWizard({ locale, pkg }: Props) {
         description: `Booking for ${pkg.title}`
       })
     });
-    const payment = await paymentRes.json();
+    await paymentRes.json();
+    let flightBooking: any = null;
+    if (selectedOffer) {
+      const bookRes = await fetch('/api/flights/book', {
+        method: 'POST',
+        body: JSON.stringify({
+          offerId: selectedOffer.id,
+          seatIds: seatDetails.map((seat) => seat.seatId),
+          passengers: travelers.map((traveler) => ({
+            firstName: traveler.firstName,
+            lastName: traveler.lastName,
+            email: traveler.email || travelers[0].email
+          }))
+        })
+      });
+      flightBooking = await bookRes.json();
+    }
     const res = await fetch('/api/bookings', {
       method: 'POST',
       body: JSON.stringify({
@@ -164,9 +255,23 @@ export default function BookingWizard({ locale, pkg }: Props) {
         userId: 'anonymous-user',
         email: travelers[0].email,
         phone: travelers[0].phone,
-        seatSelections: selectedSeats.map((seatId) => {\n          const seat = seatMaps.flatMap((map: any) => map.seats).find((s: any) => s.id === seatId);\n          return { seatId, label: seatId, price: seat?.price || 0, currency: seat?.currency || packageCurrency };\n        }),
+        seatSelections: seatDetails.map((seat) => ({
+          seatId: seat.seatId,
+          label: seat.label,
+          price: seat.price,
+          currency: seat.currency
+        })),
         flightSelection: selectedOffer
-          ? { price: selectedOffer.totalAmount, currency: selectedOffer.currency }
+          ? {
+              offerId: selectedOffer.id,
+              provider: selectedOffer.provider,
+              price: flightPricing?.base ?? selectedOffer.totalAmount,
+              currency: flightPricing?.currency || selectedOffer.currency,
+              seatIds: seatDetails.map((seat) => seat.seatId),
+              seatTotal: seatDetails.reduce((acc, seat) => acc + seat.price, 0),
+              segments: selectedOffer.segments,
+              ticketing: flightBooking?.result || null
+            }
           : undefined
       })
     });

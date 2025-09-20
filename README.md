@@ -45,6 +45,15 @@ A production-ready travel booking platform for Ghaya Travel built with Next.js 1
    pnpm e2e # requires `pnpm dev`
    ```
 
+### Testing locally
+
+- To quickly validate pricing math (including seat fees), run the focused unit suite:
+  ```bash
+  pnpm test -- --runTestsByPath tests/unit/pricing.test.ts
+  ```
+- Playwright tests rely on a running dev server (`pnpm dev`) and a seeded database. Use `pnpm e2e` once the server is ready.
+- If you are running against a clean database, execute `pnpm prisma migrate deploy` followed by `pnpm prisma db seed` before launching tests so fixtures such as flight offers and packages exist.
+
 6. **Build for production**
    ```bash
    pnpm build && pnpm start

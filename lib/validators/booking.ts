@@ -14,7 +14,14 @@ export const addOnsSchema = z.object({
 
 export const flightSelectionSchema = z.object({
   offerId: z.string(),
-  seatIds: z.array(z.string()).default([])
+  provider: z.string().optional(),
+  price: z.number(),
+  currency: z.string().length(3),
+  seatIds: z.array(z.string()).default([]),
+  seatTotal: z.number().optional(),
+  segments: z.any().optional(),
+  ticketing: z.any().optional(),
+  recordLocator: z.string().optional()
 });
 
 export const bookingReviewSchema = z.object({
