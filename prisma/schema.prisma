@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  editor
+  support
+  customer
+}
+
+enum CategoryKey {
+  domestic
+  international
+  cruise
+  religious
+  special
+}
+
+enum AddOnType {
+  flight
+  hotel
+  transfer
+  activity
+  insurance
+}
+
+enum PromoType {
+  percent
+  fixed
+}
+
+enum NotificationChannel {
+  email
+  whatsapp
+  sms
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+
+enum PostStatus {
+  draft
+  published
+}
+
+enum BookingStatus {
+  draft
+  confirmed
+  cancelled
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  phone        String?
+  passwordHash String?
+  image        String?
+  role         Role     @default(customer)
+  googleId     String?  @unique
+  facebookId   String?  @unique
+  bookings     Booking[]
+  reviews      Review[]
+  wishlist     Wishlist[]
+  auditLogs    AuditLog[] @relation("AuditActor")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Destination {
+  id          String    @id @default(cuid())
+  name        String   @unique
+  country     String
+  city        String
+  lat         Float?
+  lng         Float?
+  description String?
+  images      String[]  @default([])
+  packages    Package[]
+}
+
+model Category {
+  id        String      @id @default(cuid())
+  key       CategoryKey @unique
+  name      String
+  packages  Package[]
+}
+
+model Package {
+  id               String          @id @default(cuid())
+  categoryId       String
+  title            String
+  slug             String          @unique
+  summary          String
+  durationNights   Int
+  durationDays     Int
+  basePrice        Float
+  currency         String          @default("EGP")
+  highlights       String[]        @default([])
+  coverImage       String?
+  gallery          String[]        @default([])
+  virtualTourUrl   String?
+  inclusions       String[]        @default([])
+  exclusions       String[]        @default([])
+  faq              Json?
+  seoTitle         String?
+  seoDescription   String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  category         Category        @relation(fields: [categoryId], references: [id])
+  itineraryItems   ItineraryItem[]
+  addOns           AddOn[]
+  reviews          Review[]
+  bookings         Booking[]
+  destinations     Destination[]
+  pricingRules     PricingRule[]
+}
+
+model ItineraryItem {
+  id          String   @id @default(cuid())
+  packageId   String
+  dayNumber   Int
+  title       String
+  description String
+  media       String[] @default([])
+  package     Package  @relation(fields: [packageId], references: [id])
+}
+
+model AddOn {
+  id          String    @id @default(cuid())
+  packageId   String?
+  type        AddOnType
+  title       String
+  description String?
+  price       Float
+  currency    String    @default("EGP")
+  isOptional  Boolean   @default(true)
+  package     Package?  @relation(fields: [packageId], references: [id])
+  bookings    BookingAddon[]
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  packageId String
+  userId    String
+  rating    Int
+  title     String
+  body      String
+  status    ReviewStatus @default(pending)
+  createdAt DateTime     @default(now())
+  package   Package      @relation(fields: [packageId], references: [id])
+  user      User         @relation(fields: [userId], references: [id])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  packageId String
+  user      User     @relation(fields: [userId], references: [id])
+  package   Package  @relation(fields: [packageId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id              String           @id @default(cuid())
+  userId          String
+  packageId       String?
+  status          BookingStatus    @default(draft)
+  travelers       Json
+  currency        String
+  subtotal        Float            @default(0)
+  taxes           Float            @default(0)
+  fees            Float            @default(0)
+  discounts       Float            @default(0)
+  total           Float            @default(0)
+  paymentStatus   PaymentStatus    @default(pending)
+  paymentProvider String?
+  invoiceNumber   String?
+  seatFees        Float            @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id])
+  package         Package?         @relation(fields: [packageId], references: [id])
+  addOns          BookingAddon[]
+  flight          FlightSelection?
+  invoice         Invoice?
+  notifications   Notification[]
+}
+
+model BookingAddon {
+  id         String  @id @default(cuid())
+  bookingId  String
+  addOnId    String
+  unitPrice  Float
+  qty        Int     @default(1)
+  booking    Booking @relation(fields: [bookingId], references: [id])
+  addOn      AddOn   @relation(fields: [addOnId], references: [id])
+}
+
+model FlightSelection {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  aggregator    String
+  offerId       String
+  price         Float
+  currency      String
+  segments      Json
+  seatIds       String[] @default([])
+  recordLocator String?
+  booking       Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  number    String
+  pdfUrl    String
+  createdAt DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model CurrencyRate {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  rateToEGP Float
+  updatedAt DateTime @default(now())
+  manual    Boolean  @default(true)
+}
+
+model PromoCode {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  type           PromoType
+  value          Float
+  validFrom      DateTime?
+  validTo        DateTime?
+  maxRedemptions Int?
+  usedCount      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model NotificationTemplate {
+  id       String               @id @default(cuid())
+  channel  NotificationChannel
+  key      String               @unique
+  subject  String?
+  body     String
+  locale   String @default("ar")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  target    String
+  meta      Json?
+  createdAt DateTime @default(now())
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id])
+}
+
+model PricingRule {
+  id        String   @id @default(cuid())
+  packageId String
+  name      String
+  percent   Float
+  startsAt  DateTime
+  endsAt    DateTime
+  package   Package  @relation(fields: [packageId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  bookingId String?
+  channel   NotificationChannel
+  payload   Json
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+}
+
+model BlogCategory {
+  id      String   @id @default(cuid())
+  slug    String   @unique
+  title   String
+  posts   BlogPost[]
+}
+
+model Tag {
+  id    String   @id @default(cuid())
+  slug  String   @unique
+  title String
+  posts BlogPostTag[]
+}
+
+model BlogPost {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  titleAr     String
+  titleEn     String
+  summaryAr   String
+  summaryEn   String
+  contentAr   String
+  contentEn   String
+  coverImage  String?
+  categoryId  String
+  status      PostStatus  @default(draft)
+  publishedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  category    BlogCategory @relation(fields: [categoryId], references: [id])
+  tags        BlogPostTag[]
+}
+
+model BlogPostTag {
+  postId String
+  tagId  String
+  post   BlogPost @relation(fields: [postId], references: [id])
+  tag    Tag      @relation(fields: [tagId], references: [id])
+
+  @@id([postId, tagId])
+}
+

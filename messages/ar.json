@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "packages": "الباقات",
+    "hajjUmrah": "الحج والعمرة",
+    "flights": "الطيران",
+    "blog": "المدونة",
+    "contact": "اتصل بنا",
+    "account": "حسابي",
+    "admin": "لوحة التحكم",
+    "wishlist": "المفضلة"
+  },
+  "hero": {
+    "title": "استكشف مصر والعالم مع غاية للسياحة",
+    "subtitle": "رحلات مصممة بعناية وخدمات متميزة للحجاج والمسافرين.",
+    "cta": "ابدأ رحلتك",
+    "whatsapp": "تواصل عبر واتساب"
+  },
+  "home": {
+    "featured": "باقات مميزة",
+    "testimonials": "قصص عملائنا",
+    "blog": "أحدث المقالات",
+    "search": {
+      "title": "ابحث عن رحلة أو طيران",
+      "packagesPlaceholder": "إلى أين ترغب بالسفر؟",
+      "flightsPlaceholder": "ابحث عن رحلة جوية بالمدينة أو المطار",
+      "submit": "بحث"
+    }
+  },
+  "footer": {
+    "rights": "جميع الحقوق محفوظة.",
+    "links": {
+      "privacy": "سياسة الخصوصية",
+      "terms": "الشروط والأحكام"
+    }
+  },
+  "packages": {
+    "filters": {
+      "category": "الفئة",
+      "duration": "المدة",
+      "price": "السعر",
+      "destination": "الوجهة",
+      "apply": "تطبيق الفلاتر"
+    },
+    "durationDays": "{count} يوم",
+    "cta": "عرض التفاصيل",
+    "startFrom": "ابتداءً من",
+    "book": "احجز الآن"
+  },
+  "package": {
+    "highlights": "أهم النقاط",
+    "inclusions": "المشتملات",
+    "exclusions": "غير متضمن",
+    "itinerary": "برنامج الرحلة",
+    "faq": "الأسئلة الشائعة",
+    "reviews": "التقييمات",
+    "addToWishlist": "أضف إلى المفضلة",
+    "price": {
+      "title": "تكلفة رحلتك",
+      "perPerson": "للشخص",
+      "addOns": "الإضافات",
+      "flight": "رحلة الطيران",
+      "seats": "اختيار المقاعد",
+      "total": "الإجمالي المقدر"
+    }
+  },
+  "booking": {
+    "steps": {
+      "package": "الباقة",
+      "addons": "الإضافات",
+      "flight": "الطيران",
+      "seats": "المقاعد",
+      "travelers": "المسافرون",
+      "review": "مراجعة",
+      "payment": "الدفع"
+    },
+    "next": "التالي",
+    "back": "السابق",
+    "complete": "تأكيد الدفع",
+    "success": "شكراً لك! تم تأكيد الحجز."
+  },
+  "contact": {
+    "title": "دعنا نصمم تجربتك القادمة",
+    "submit": "إرسال الرسالة",
+    "success": "تم إرسال الرسالة بنجاح"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج"
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "bookingsToday": "حجوزات اليوم",
+    "revenue": "الإيرادات",
+    "currency": "إدارة العملات",
+    "promo": "أكواد الخصم",
+    "audit": "سجل التدقيق"
+  }
+}

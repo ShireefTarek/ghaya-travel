@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".test-dist",
+    "module": "commonjs",
+    "target": "es2020",
+    "moduleResolution": "node",
+    "types": [],
+    "rootDir": ".",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declaration": false,
+    "sourceMap": false,
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "lib/pricing/**/*.ts",
+    "lib/prisma.ts",
+    "lib/prisma.mock.ts",
+    "tests/unit/**/*.ts",
+    "types/**/*.d.ts"
+  ],
+  "exclude": ["node_modules"]
+}
