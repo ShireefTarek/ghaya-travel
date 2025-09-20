@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "packages": "Packages",
+    "hajjUmrah": "Hajj & Umrah",
+    "flights": "Flights",
+    "blog": "Blog",
+    "contact": "Contact",
+    "account": "Account",
+    "admin": "Admin",
+    "wishlist": "Wishlist"
+  },
+  "hero": {
+    "title": "Discover Egypt & Beyond with Ghaya Travel",
+    "subtitle": "Tailored journeys, curated experiences, and premium support for explorers and pilgrims.",
+    "cta": "Plan Your Journey",
+    "whatsapp": "Chat on WhatsApp"
+  },
+  "home": {
+    "featured": "Featured Packages",
+    "testimonials": "Traveler Stories",
+    "blog": "Latest Insights",
+    "search": {
+      "title": "Search Trips or Flights",
+      "packagesPlaceholder": "Where would you like to go?",
+      "flightsPlaceholder": "Search flights by city or airport",
+      "submit": "Search"
+    }
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms & Conditions"
+    }
+  },
+  "packages": {
+    "filters": {
+      "category": "Category",
+      "duration": "Duration",
+      "price": "Price Range",
+      "destination": "Destination",
+      "apply": "Apply filters"
+    },
+    "durationDays": "{count} days",
+    "cta": "View Details",
+    "startFrom": "From",
+    "book": "Book now"
+  },
+  "package": {
+    "highlights": "Highlights",
+    "inclusions": "Inclusions",
+    "exclusions": "Exclusions",
+    "itinerary": "Itinerary",
+    "faq": "FAQs",
+    "reviews": "Reviews",
+    "addToWishlist": "Add to wishlist",
+    "price": {
+      "title": "Your Travel Investment",
+      "perPerson": "per person",
+      "addOns": "Add-ons",
+      "flight": "Selected flight",
+      "seats": "Seat selection",
+      "total": "Estimated total"
+    }
+  },
+  "booking": {
+    "steps": {
+      "package": "Package",
+      "addons": "Add-ons",
+      "flight": "Flights",
+      "seats": "Seats",
+      "travelers": "Travelers",
+      "review": "Review",
+      "payment": "Payment"
+    },
+    "next": "Continue",
+    "back": "Back",
+    "complete": "Confirm & Pay",
+    "success": "Thank you! Your booking is confirmed."
+  },
+  "contact": {
+    "title": "Let’s craft your next experience",
+    "submit": "Send message",
+    "success": "Message sent successfully"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "bookingsToday": "Bookings today",
+    "revenue": "Revenue",
+    "currency": "Currency Manager",
+    "promo": "Promo Codes",
+    "audit": "Audit log"
+  }
+}

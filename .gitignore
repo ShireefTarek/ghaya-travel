@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+coverage
+.env
+.env.*
+.prisma
+playwright-report
+.test-results
+artifacts
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+.DS_Store
+coverage
+prisma/generated
