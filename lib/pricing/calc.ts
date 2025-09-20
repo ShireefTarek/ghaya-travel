@@ -93,7 +93,7 @@ export async function calculatePrice(input: PricingInput): Promise<PricingBreakd
   const convertedBase = await convertCurrency(base, pkg.currency, input.bookingCurrency);
 
   const addOns = (input.addOnIds || [])
-    .map((id) => pkg.addOns.find((a) => a.id === id))
+    .map((id: string) => pkg.addOns.find((a: any) => a.id === id))
     .filter(Boolean)
     .map((addOn) => ({
       id: addOn!.id,

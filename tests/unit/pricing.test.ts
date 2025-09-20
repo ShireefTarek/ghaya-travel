@@ -10,13 +10,13 @@ describe('pricing calculations', () => {
     const baseBreakdown = await calculatePrice({
       packageId: pkg.id,
       travelerCount: 2,
-      addOnIds: pkg.addOns.slice(0, 1).map((a) => a.id),
+      addOnIds: pkg.addOns.slice(0, 1).map((a: any) => a.id),
       bookingCurrency: pkg.currency
     });
     const seatBreakdown = await calculatePrice({
       packageId: pkg.id,
       travelerCount: 2,
-      addOnIds: pkg.addOns.slice(0, 1).map((a) => a.id),
+      addOnIds: pkg.addOns.slice(0, 1).map((a: any) => a.id),
       bookingCurrency: pkg.currency,
       seatSelections: [
         { seatId: '1A', label: '1A', price: 25, currency: pkg.currency }

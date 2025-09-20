@@ -1,5 +1,12 @@
 import prisma from '@/lib/prisma';
-import { CurrencyRate } from '@prisma/client';
+
+export type CurrencyRate = {
+  id: string;
+  code: string;
+  rateToEGP: number;
+  updatedAt: Date;
+  manual: boolean;
+};
 
 async function fetchProviderRate(code: string): Promise<number | null> {
   if (!process.env.OPEN_EXCHANGE_RATES_KEY) {
